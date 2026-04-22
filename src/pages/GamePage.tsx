@@ -142,7 +142,6 @@ export default function GamePage() {
                 style={{ animationDelay: `${i * 0.08}s` }}
                 disabled={!!selected}
               >
-                <span className="text-xl mb-1 block select-none">{opt.emoji}</span>
                 <span className="text-foreground">{opt.name}</span>
                 {showResult && isCorrect && (
                   <Icon name="Check" size={14} className="text-green-400 mx-auto mt-1" />
