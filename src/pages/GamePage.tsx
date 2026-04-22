@@ -162,7 +162,7 @@ export default function GamePage() {
             const isSelected = selected === opt.id;
             const showResult = selected !== null;
 
-            let cls = 'card-cosmos rounded p-4 text-center font-golos text-sm font-medium transition-all cursor-pointer ';
+            let cls = 'card-cosmos rounded p-4 min-h-[64px] text-center font-golos text-sm font-medium transition-all cursor-pointer flex flex-col items-center justify-center active:scale-95 ';
             if (showResult) {
               if (isCorrect) cls += 'answer-correct ';
               else if (isSelected) cls += 'answer-wrong ';

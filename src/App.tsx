@@ -18,31 +18,31 @@ export default function App() {
       </div>
 
       {activeTab !== 'home' && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/90 backdrop-blur-md">
-          <div className="flex items-center justify-around max-w-md mx-auto px-4 py-3">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/90 backdrop-blur-md safe-bottom">
+          <div className="flex items-center justify-around max-w-md mx-auto px-2 py-2">
             <button
               onClick={() => setActiveTab('home')}
-              className="flex flex-col items-center gap-1 px-4 py-1 rounded transition-colors text-muted-foreground hover:text-foreground"
+              className="flex flex-col items-center gap-1 flex-1 py-2 rounded transition-colors text-muted-foreground hover:text-foreground active:scale-95"
             >
-              <Icon name="Home" size={20} />
+              <Icon name="Home" size={24} />
               <span className="text-xs font-golos">Главная</span>
             </button>
             <button
               onClick={() => setActiveTab('game')}
-              className={`flex flex-col items-center gap-1 px-4 py-1 rounded transition-colors ${
+              className={`flex flex-col items-center gap-1 flex-1 py-2 rounded transition-colors active:scale-95 ${
                 activeTab === 'game' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon name="Gamepad2" size={20} />
+              <Icon name="Gamepad2" size={24} />
               <span className="text-xs font-golos">Игра</span>
             </button>
             <button
               onClick={() => setActiveTab('learn')}
-              className={`flex flex-col items-center gap-1 px-4 py-1 rounded transition-colors ${
+              className={`flex flex-col items-center gap-1 flex-1 py-2 rounded transition-colors active:scale-95 ${
                 activeTab === 'learn' ? 'text-accent' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon name="BookOpen" size={20} />
+              <Icon name="BookOpen" size={24} />
               <span className="text-xs font-golos">Обучение</span>
             </button>
           </div>
