@@ -26,6 +26,8 @@ const OBJECTS: AstroObject[] = [
   { id: 'black_hole', name: 'Чёрная дыра', emoji: '⭕', type: 'object', hint: 'Объект с такой гравитацией, что даже свет не может вырваться.', color: '#6b7280' },
 ];
 
+const TOTAL_QUESTIONS = 10;
+
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -40,67 +42,102 @@ function getOptions(correct: AstroObject, all: AstroObject[]): AstroObject[] {
   return shuffleArray([correct, ...others]);
 }
 
+function ResultScreen({ score, onRestart }: { score: number; onRestart: () => void }) {
+  const percent = Math.round((score / TOTAL_QUESTIONS) * 100);
+  const medal = percent === 100 ? '🏆' : percent >= 70 ? '🥈' : percent >= 40 ? '🥉' : '🌑';
+  const message =
+    percent === 100 ? 'Идеально! Ты настоящий космонавт!' :
+    percent >= 70 ? 'Отлично! Ты хорошо знаешь космос.' :
+    percent >= 40 ? 'Неплохо! Продолжай изучать.' :
+    'Загляни в справочник и попробуй ещё раз.';
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center pb-24 px-4">
+      <div className="max-w-md mx-auto text-center">
+        <div className="text-7xl mb-6 opacity-0-init animate-fade-in">{medal}</div>
+        <h2 className="font-cormorant text-4xl font-light mb-2 opacity-0-init animate-fade-in-up delay-100">
+          Игра окончена
+        </h2>
+        <div className="geo-line w-24 mx-auto my-4" />
+
+        <div className="card-cosmos rounded-lg p-8 mb-6 opacity-0-init animate-fade-in-up delay-200">
+          <div className="font-cormorant text-6xl text-primary font-light mb-1">
+            {score}/{TOTAL_QUESTIONS}
+          </div>
+          <div className="font-golos text-muted-foreground text-sm mb-4">{percent}% правильных ответов</div>
+          <p className="font-golos text-sm text-foreground">{message}</p>
+        </div>
+
+        <button
+          onClick={onRestart}
+          className="btn-glow w-full py-3 bg-primary/10 border border-primary/40 rounded font-golos text-sm text-primary font-medium hover:bg-primary/20 transition-all flex items-center justify-center gap-2 opacity-0-init animate-fade-in-up delay-300"
+        >
+          <Icon name="RotateCcw" size={16} />
+          Играть ещё раз
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function GamePage() {
   const [score, setScore] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [streak, setStreak] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
-  const [showHint, setShowHint] = useState(false);
-  const [gameObjects] = useState(() => shuffleArray(OBJECTS));
+  const [gameObjects] = useState(() => shuffleArray(OBJECTS).slice(0, TOTAL_QUESTIONS));
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [key, setKey] = useState(0);
 
-  const current = gameObjects[currentIndex % gameObjects.length];
+  const current = gameObjects[currentIndex];
   const options = useCallback(() => getOptions(current, OBJECTS), [current])();
 
   const handleAnswer = (id: string) => {
     if (selected) return;
     setSelected(id);
-    setTotal(t => t + 1);
-    if (id === current.id) {
-      setScore(s => s + 1);
-      setStreak(s => s + 1);
-    } else {
-      setStreak(0);
-    }
-    setShowHint(true);
+    if (id === current.id) setScore(s => s + 1);
   };
 
   const nextQuestion = () => {
-    setSelected(null);
-    setShowHint(false);
-    setCurrentIndex(i => i + 1);
+    if (currentIndex + 1 >= TOTAL_QUESTIONS) {
+      setFinished(true);
+    } else {
+      setSelected(null);
+      setCurrentIndex(i => i + 1);
+    }
   };
 
-  const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
+  const restart = () => {
+    setScore(0);
+    setSelected(null);
+    setCurrentIndex(0);
+    setFinished(false);
+    setKey(k => k + 1);
+  };
+
+  if (finished) {
+    return <ResultScreen score={score} onRestart={restart} />;
+  }
 
   return (
-    <div className="min-h-screen pb-24 pt-8 px-4">
+    <div key={key} className="min-h-screen pb-24 pt-8 px-4">
       <div className="max-w-md mx-auto">
         {/* Шапка */}
-        <div className="flex items-center justify-between mb-8 opacity-0-init animate-fade-in">
+        <div className="flex items-center justify-between mb-6 opacity-0-init animate-fade-in">
           <div>
             <h2 className="font-cormorant text-2xl font-light">Игра</h2>
             <p className="text-xs text-muted-foreground font-golos">Угадай объект по описанию</p>
           </div>
-          <div className="flex items-center gap-3 text-xs font-golos">
-            {streak >= 3 && (
-              <div className="flex items-center gap-1 text-accent">
-                <Icon name="Flame" size={14} />
-                <span>{streak}</span>
-              </div>
-            )}
-            <div className="text-right">
-              <div className="text-foreground font-medium">{score}/{total}</div>
-              <div className="text-muted-foreground">{accuracy}%</div>
-            </div>
+          <div className="text-right font-golos">
+            <div className="text-foreground font-medium text-sm">{currentIndex + 1} / {TOTAL_QUESTIONS}</div>
+            <div className="text-xs text-muted-foreground">{score} верных</div>
           </div>
         </div>
 
-        {/* Прогресс */}
-        <div className="h-px bg-border mb-8 rounded-full overflow-hidden opacity-0-init animate-fade-in delay-100">
+        {/* Прогресс по вопросам */}
+        <div className="h-1 bg-border mb-8 rounded-full overflow-hidden opacity-0-init animate-fade-in delay-100">
           <div
-            className="progress-cosmos h-full"
-            style={{ width: `${accuracy}%` }}
+            className="progress-cosmos h-full rounded-full"
+            style={{ width: `${((currentIndex) / TOTAL_QUESTIONS) * 100}%` }}
           />
         </div>
 
@@ -172,7 +209,7 @@ export default function GamePage() {
               onClick={nextQuestion}
               className="btn-glow w-full py-3 bg-primary/10 border border-primary/40 rounded font-golos text-sm text-primary font-medium hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
             >
-              Следующий вопрос
+              {currentIndex + 1 >= TOTAL_QUESTIONS ? 'Посмотреть результат' : 'Следующий вопрос'}
               <Icon name="ArrowRight" size={16} />
             </button>
           </div>
